@@ -2,4 +2,8 @@
 *.dvi
 *.log
 *.pdf
+*.out
+*.o
+*.swp
+*.workload
 .DS_Store
