@@ -1,7 +1,7 @@
 #include <iostream>
 #include <random>
 #include <stdio.h>
-#include <time.h>
+#include <random>
 using namespace std;
 
 typedef unsigned long long ull;
@@ -18,9 +18,15 @@ int to_int(char *p) {
 int main(int argc, char **argv) {
   int n, k;
   n = to_int(argv[1]); k = to_int(argv[2]);
-  uint e = 0;
+  ld x0 = stold(string(argv[3])), gamma = stold(string(argv[4]));
+  default_random_engine gen;
+  cauchy_distribution<ld> dist(x0, gamma);
+  uint cur = 0;
   while (k--) {
-    printf("%d\n", (e++) % n);
+    cur += dist(gen);
+    cur %= n;
+    if (cur < 0) cur += n;
+    printf("%d\n", cur);
   }
   return 0;
 }
