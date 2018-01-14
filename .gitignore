@@ -1,5 +1,10 @@
 *.aux
+.tex
 *.dvi
+*.bbl
+*.blg
+*.run.xml
+*.toc
 *.log
 *.pdf
 *.out
