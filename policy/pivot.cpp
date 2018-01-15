@@ -20,10 +20,10 @@ inline int to_int(char *p) {
 int main(int argc, char **argv) {
   ios::sync_with_stdio(false);  
   int size = to_int(argv[1]);
-  int hit = 0, total = 0;
-  set<uint> Q;
-  uint n;
-  uint pivot = 0;
+  int hit = 0, miss = 0;
+  set<ull> Q;
+  ull n;
+  ull pivot = 0;
   while (cin >> n) {
     auto itr = Q.find(n);
     if (itr != Q.end()) {
@@ -34,10 +34,10 @@ int main(int argc, char **argv) {
       // Cache Full: pop the element on the other end of pivot
       if (n > pivot) Q.erase(Q.begin());
       else Q.erase(--Q.end());
+      ++miss;
     }
-    ++total;
     Q.insert(n);
   }
-  printf("%d\n%d\n", hit, total);
+  printf("%d\n%d\n", hit, miss);
   return 0;
 }

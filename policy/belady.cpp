@@ -23,22 +23,22 @@ inline int to_int(char *p) {
 int main(int argc, char **argv) {
   ios::sync_with_stdio(false);  
   int size = to_int(argv[1]);
-  int hit = 0, total = 0;
-  hmap<uint, queue<int>> D;
-  uint n;
-  vector<int> E;
+  int hit = 0, miss = 0;
+  hmap<ull, queue<int>> D;
+  ull n;
+  vector<ull> E;
   while (cin >> n) {
     D[n].push(E.size());
     E.push_back(n);
   }
-  hset<uint> Q;
+  hset<ull> Q;
   for (int i = 0; i < E.size(); ++i) {
     n = E[i];
     auto itr = Q.find(n);
     if (itr != Q.end()) ++hit;
     else if (Q.size() == size) {
-      int vic, dist = 0;
-      for (uint e : Q) {
+      ull vic, dist = 0;
+      for (ull e : Q) {
         while (!D[e].empty() && D[e].front() <= i) D[e].pop();
         if (D[e].empty()) {
           vic = e;
@@ -51,10 +51,10 @@ int main(int argc, char **argv) {
         }
       }
       Q.erase(Q.find(vic));
+      ++miss;
     }
-    ++total;
     Q.insert(n);
   }
-  printf("%d\n%d\n", hit, total);
+  printf("%d\n%d\n", hit, miss);
   return 0;
 }
