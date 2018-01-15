@@ -9,6 +9,7 @@
 *.pdf
 *.out
 *.o
+*.so
 *.swp
 *.workload
 .DS_Store

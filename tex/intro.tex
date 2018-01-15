@@ -5,7 +5,8 @@ The applications of caching are wildly used at different levels in computing sys
 However, the idea of caching has existed for a long time.
 For example, department stores, emerged in 19\textsuperscript{th} century,  
   serve as a cache between local customers and distant manufacturers \cite{departmentstores}.
-A cache has limited size and needs a policy to decide which elements to replace.
+A cache has limited size and needs a policy to decide which elements to replace 
+  (caching policy, or cache replacement policy).
 When there is request to fetch from the slow medium, 
   the requested element could have existed in the cache.
 In this scenario, a cache hit is observed.
@@ -14,6 +15,7 @@ The performance of a caching policy is measured by the cache hit ratio,
 An optimal caching policy with the highest possible score generates the maximum number of cache hits.
 A cache hit results in saving time from accessing the slow medium, 
   but the policy itself also consumes time and resources. 
-There exists a trade-off between the score and overhead of a caching policy.\\
+There exists a trade-off between the score and overhead of a caching policy.
 
-
+\subsection{CPU Cache}
+  Least Recently Used(LRU) is widely used in CPU Cache \cite{itanium}.

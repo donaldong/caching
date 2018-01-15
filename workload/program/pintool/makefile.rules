@@ -1,0 +1,18 @@
+##############################################################
+#
+# This file includes all the test targets as well as all the
+# non-default build rules and test recipes.
+#
+##############################################################
+
+
+##############################################################
+#
+# Tools targets
+#
+##############################################################
+TEST_TOOL_ROOTS := data
+
+TOOL_CXXFLAGS += -std=gnu++0x
+TOOL_CXXFLAGS_NOOPT=1
+DEBUG = 1
