@@ -26,8 +26,8 @@ void instruction(INS ins, void *v) {
 }
 
 int main(int argc, char * argv[]) {
-  READ.open("data.read");
-  WRITE.open("data.write");
+  READ.open("data.read.workload");
+  WRITE.open("data.write.workload");
   PIN_Init(argc, argv);
   INS_AddInstrumentFunction(instruction, 0);
   PIN_StartProgram();

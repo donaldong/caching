@@ -5,8 +5,8 @@ The applications of caching are wildly used at different levels in computing sys
 However, the idea of caching has existed for a long time.
 For example, department stores, emerged in 19\textsuperscript{th} century,  
   serve as a cache between local customers and distant manufacturers \cite{departmentstores}.
-A cache has limited size and needs a policy to decide which elements to replace 
-  (caching policy, or cache replacement policy).
+A cache has limited size and needs an algorithm to decide which elements to replace when it is full.
+The embedded replacement algorithm is referred to caching policy, or cache replacement policy.
 When there is request to fetch from the slow medium, 
   the requested element could have existed in the cache.
 In this scenario, a cache hit is observed.
@@ -16,6 +16,27 @@ An optimal caching policy with the highest possible score generates the maximum 
 A cache hit results in saving time from accessing the slow medium, 
   but the policy itself also consumes time and resources. 
 There exists a trade-off between the score and overhead of a caching policy.
+Many policies have robust performance under some workloads but not the others,
+  any many caching policies are designed to be adaptive to the workloads,
+In this paper, first, we will explore the idea and implementation of a variety of caching policies,
+  which are, or could be, applied in different applications.
+Then we will discuss the characteristics of these policies under different workloads.
+Finally, we present a model to select the proper caching policy based on the prediction of future workload.
 
-\subsection{CPU Cache}
-  Least Recently Used(LRU) is widely used in CPU Cache \cite{itanium}.
+\subsection{Least Recently Used}
+Least Recently Used (LRU) is widely used in CPU Cache, GPU Cache, and Disk Cache \cite{itanium}.
+LRU predicts the newest element in the cache will be most likely to be used again in the future.
+There are two major ways to implement LRU:
+\begin{enumerate}
+  \item The concept of aging. (O(n))
+  \item linked list / prioirty queue + binary search (O(log(n)))
+\end{enumerate}
+
+\subsection{Most Recently Used}
+
+\subsection{Least Frequently Used}
+
+\subsection{Most Frequently Used}
+
+\subsection{Belady's Algorithm}
+Belady's Algorithm is proved to be optimal \cite{belady}.
