@@ -1,11 +1,14 @@
 CC = g++ -std=c++11 -O3
 size ?= 60
 
-all: lru.o ld.o pivot.o belady.o metrics.out
+all: lru.o mru.o ld.o pivot.o belady.o metrics.out
 	cat metrics.out
 
 lru.o: least-recently-used.cpp
 	$(CC) least-recently-used.cpp -o lru.o
+
+mru.o: most-recently-used.cpp
+	$(CC) most-recently-used.cpp -o mru.o
 
 ld.o: longest-distance.cpp
 	$(CC) longest-distance.cpp -o ld.o
@@ -19,4 +22,3 @@ belady.o: belady.cpp
 metrics.out: metrics.sh
 	cd ../workload && make workload
 	./metrics.sh $(size) > metrics.out
-	cat metrics.out
