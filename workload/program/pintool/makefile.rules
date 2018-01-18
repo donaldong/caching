@@ -11,7 +11,7 @@
 # Tools targets
 #
 ##############################################################
-TEST_TOOL_ROOTS := data
+TEST_TOOL_ROOTS := data instruction
 
 TOOL_CXXFLAGS += -std=gnu++0x
 TOOL_CXXFLAGS_NOOPT=1

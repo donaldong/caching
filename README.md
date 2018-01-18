@@ -12,3 +12,6 @@
     + Add an local command `pin`
         + `export PATH=$PATH":$HOME/bin"`
         + In `~/bin/`, create shortcut `pin`: `$PIN_ROOT/pin "$@"`
++ Perf
+    + [link](http://www.brendangregg.com/perf.html)
+    + Print page table [link](https://stackoverflow.com/questions/20069620/print-kernels-page-table-entries)
