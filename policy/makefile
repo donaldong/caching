@@ -1,7 +1,8 @@
 CC = g++ -std=c++11 -O3
 size ?= 100
 
-all: lru.o ld.o pivot.o belady.o
+all: lru.o ld.o pivot.o belady.o metrics.out
+	cat metrics.out
 
 lru.o: least-recently-used.cpp
 	$(CC) least-recently-used.cpp -o lru.o
@@ -15,8 +16,7 @@ pivot.o: pivot.cpp
 belady.o: belady.cpp
 	$(CC) belady.cpp -o belady.o
 
-.PHONY: metrics
-metrics: all
+metrics.out: metrics.sh
 	cd ../workload && make
 	./metrics.sh $(size) > metrics.out
 	cat metrics.out

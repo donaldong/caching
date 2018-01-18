@@ -1,0 +1,9 @@
+#!/bin/bash
+n=100
+k=100000
+mu=0
+sigma=30
+x0=0
+gamma=30
+fib_n=30
+pin=$PIN_ROOT/pin
