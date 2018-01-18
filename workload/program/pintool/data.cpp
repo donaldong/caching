@@ -1,4 +1,5 @@
 #include "pin.H"
+#include <string>
 #include <fstream>
 
 ofstream READ, WRITE;
@@ -25,10 +26,16 @@ void instruction(INS ins, void *v) {
   }
 }
 
+KNOB<string> prefix(KNOB_MODE_WRITEONCE, "pintool",
+  "o", "a", "specify output file prefix");
+
 int main(int argc, char * argv[]) {
-  READ.open("data.read.workload");
-  WRITE.open("data.write.workload");
-  PIN_Init(argc, argv);
+  PIN_InitSymbols();
+  if (PIN_Init(argc, argv)) return -1;
+  string readfile = prefix.Value() + ".read.data.workload";
+  string writefile = prefix.Value() + ".write.data.workload";
+  READ.open(readfile.c_str());
+  WRITE.open(writefile.c_str());
   INS_AddInstrumentFunction(instruction, 0);
   PIN_StartProgram();
   READ.close();

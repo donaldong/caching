@@ -18,12 +18,12 @@ int to_int(char *p) {
 int main(int argc, char **argv) {
   int n, k;
   n = to_int(argv[1]); k = to_int(argv[2]);
-  ld mu = stold(string(argv[3])), sigma = stold(string(argv[4]));
+  ld mu = n, sigma = stold(string(argv[3]));
+  mu /= 2;
   default_random_engine gen;
   normal_distribution<ld> dist(mu, sigma);
-  uint cur = 0;
   while (k--) {
-    cur += dist(gen);
+    uint cur = dist(gen);
     cur %= n;
     if (cur < 0) cur += n;
     printf("%d\n", cur);
