@@ -1,24 +1,4 @@
-#include <iostream>
-#include <stdio.h>
-#include <climits>
-#include <unordered_map>
-#include <unordered_set>
-#include <queue>
-#include <set>
-using namespace std;
-
-typedef unsigned long long ull;
-#define mp make_pair
-#define hmap unordered_map
-#define hset unordered_set
-
-inline int to_int(char *p) {
-  int res = 0, i = 0;
-  while (p[i] >= '0' && p[i] <= '9') {
-    res = res * 10 + p[i++] - '0';
-  }
-  return res;
-}
+#include "common.h"
 
 int main(int argc, char **argv) {
   ios::sync_with_stdio(false);  
