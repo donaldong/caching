@@ -1,5 +1,5 @@
 CC = g++ -std=c++11 -O3
-size ?= 100
+size ?= 60
 
 all: lru.o ld.o pivot.o belady.o metrics.out
 	cat metrics.out
@@ -17,6 +17,6 @@ belady.o: belady.cpp
 	$(CC) belady.cpp -o belady.o
 
 metrics.out: metrics.sh
-	cd ../workload && make
+	cd ../workload && make workload
 	./metrics.sh $(size) > metrics.out
 	cat metrics.out

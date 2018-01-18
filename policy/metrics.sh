@@ -1,14 +1,14 @@
 #!/bin/bash
 function strip {
-  echo $1 | sed -e "s/.*\///" -e "s/\..*//"
+  echo $1 | sed -e "s/.*\///" -e "s/\.o.*//" -e "s/\.workload.*//"
 }
 
-for algo in *.o
+for workload in ../workload/*.workload
 do
-  for workload in ../workload/*.workload
+  for algo in *.o
   do
-    a=$(strip "$algo")
-    b=$(strip "$workload")
+    a=$(strip "$workload")
+    b=$(strip "$algo")
     printf "$a $b "
     ./$algo $1 < $workload
   done
