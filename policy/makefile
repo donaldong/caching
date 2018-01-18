@@ -1,6 +1,5 @@
 CC = g++ -std=c++11 -O3
 size ?= 100
-input ?= ../workload/program/data.read.workload
 
 all: lru.o ld.o pivot.o belady.o
 
@@ -16,8 +15,8 @@ pivot.o: pivot.cpp
 belady.o: belady.cpp
 	$(CC) belady.cpp -o belady.o
 
-test: belady.o lru.o ld.o pivot.o
-	./belady.o $(size) < $(input)
-	./lru.o $(size) < $(input)
-	./ld.o $(size) < $(input)
-	./pivot.o $(size) < $(input)
+.PHONY: metrics
+metrics: all
+	cd ../workload && make
+	./metrics.sh $(size) > metrics.out
+	cat metrics.out

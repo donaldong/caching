@@ -1,6 +1,11 @@
 #!/bin/bash
+function strip {
+    echo $1 | sed -e "s/.*\///" -e "s/\..*//"
+}
+
 for workload in *.workload
 do
-  printf "$workload "
+  a=$(strip "$workload")
+  printf "$a "
   metrics/metrics.o < $workload
 done

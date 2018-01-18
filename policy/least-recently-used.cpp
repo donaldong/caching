@@ -40,6 +40,6 @@ int main(int argc, char **argv) {
     P[n] = ++p;
     Q.insert(mp(p, n));
   }
-  printf("%d\n%d\n", hit, miss);
+  printf("%d %d\n", hit, miss);
   return 0;
 }
