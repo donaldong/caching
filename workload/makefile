@@ -1,3 +1,5 @@
+CC = g++ -std=c++11 -O3
+
 all: default workload metrics.out
 	cat metrics.out
 	
@@ -15,3 +17,7 @@ workload: default .workload.out
 
 metrics.out: metrics.sh metrics/metrics.o
 	./metrics.sh > metrics.out
+
+clean:
+	rm *.workload
+	rm metrics.out

@@ -35,9 +35,13 @@ int main() {
   for (auto entry : c) {
     sum_sqrt_count += sqrt(entry.second);
   }
+  // Fractional Uniqueness
   cout << double(c.size()) / N.size() << " ";
+  // Average square-root of frequencies
   cout << sum_sqrt_count / c.size() << " ";
+  // Average reuse distance
   cout << sum_t / N.size() << " ";
+  // Average Normalized step size
   cout << sum_diff / N.size() << endl;
   return 0;
 }
