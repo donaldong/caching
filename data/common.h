@@ -50,4 +50,3 @@ ll get_file_size(ifstream &fs) {
     fs.seekg(0, fs.beg);
     return size;
 }
-

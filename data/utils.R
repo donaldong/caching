@@ -10,3 +10,9 @@ plot.hit_ratio.cache_ratio <- function(csv) {
     plot(hit_ratio ~ cache_ratio, dat, pch=19, cex=0.5, 
         col=rgb(red = 0, green = 0, blue = 0, alpha = 0.2), main=csv)
 }
+
+plot.hit_ratio.cache_size <- function(csv) {
+    dat <- load_data(csv)
+    plot(hit_ratio ~ cache_size, dat, pch=19, cex=0.5, 
+        col=rgb(red = 0, green = 0, blue = 0, alpha = 0.2), main=csv)
+}
