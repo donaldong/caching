@@ -6,6 +6,7 @@ int main(int argc, char **argv) {
   const char *filename = argv[2];
   ifstream input(filename, ios::binary|ios::ate);
   ll i = get_file_size(input);
+  i /= 8;
   int hit = 0, miss = 0;
   hmap<ull, queue<int>> D;
   ull n;
