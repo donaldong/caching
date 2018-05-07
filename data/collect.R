@@ -13,14 +13,18 @@ exec_policy <- function(policy, cache_size, workload) {
     return(as.numeric(strsplit(res, split=' ')[[1]]))
 }
 
-gen <- function(r, workload, max_size, policies) {
+gen <- function(r, workload, max_size, policies, all=FALSE) {
     df <- data.frame(data_size=integer(), cache_size=integer())
     for (policy in policies) {
         df[,policy] <- integer()
     }
     for (i in 1:r) {
-        data_size <- runif(1, min=0.01) * max_size
-        data_size <- max(as.integer(data_size), 1)
+        if (!all) {
+            data_size <- runif(1, min=0.01) * max_size
+            data_size <- max(as.integer(data_size), 1)
+        } else {
+            data_size <- max_size
+        }
         unique_size <- exec_sample(data_size, workload) 
         cache_size <- runif(1, min=0.01) * unique_size
         cache_size <- max(as.integer(cache_size), 1)
