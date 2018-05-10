@@ -1,0 +1,257 @@
+---
+title: "CPU Caching Policies and Workload Analysis"
+author: Donald Dong
+date: May 13, 2018
+output:
+  html_notebook:
+    theme: cerulean
+    highlight: pygments
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    code_folding: hide
+---
+
+# Introduction
+A cache speeds up the system by reducing latency between the fast and slow medium.
+The applications of caching are wildly used at different levels in computing system, 
+    such as CPU Cache, GPU Cache, Disk Cache, and Web Cache.
+A cache has limited size and needs an algorithm to decide which elements to replace when it is full.
+The embedded replacement algorithm is referred to caching policy, or cache replacement policy.
+When there is request to fetch from the slow medium, 
+  the requested element could have existed in the cache.
+In this scenario, a cache hit is observed.
+The performance of a caching policy is measured by the *cache hit ratio*.
+Many policies have robust performance under some workloads but not the others.
+This report is to explore the characteristics of different workloads of a CPU cache,
+and predict the best caching policy to use given the characteristics.
+
+## Caching Policy
+This report focuses on 5 caching policies.
+
+### Belady
+Belady decides the victim to eject by selecting the element with longest reuse distance in the future.
+Such policy is normally impossible to implement on the real system.
+
+### Least Recently Used (LRU)
+LRU uses the concept of aging. The policy will eject the oldest element when the cache is full.
+
+### Most Recently Used (MRU)
+MRU is the opposite of LRU. It also updates the ages, but the youngest element will be ejected.
+
+### Pivot
+We purpose an idea to find the victim based on the pivot. 
+We cache the address of previous access and set it as the pivot.
+When the new element comes and need to be inserted into the cache,
+we check the relative direction to the pivot. 
+If it's on the left side of the pivot, we eject the right most element.
+Otherwise if it's on the right side of the pivot, we eject the left most element.
+
+
+### Longest Distance
+We purpose an idea to find the victim by simply choosing the element with the longest distance.
+If we use address to calculate the distance, the ejected element would be either at the left or right end.
+
+## Workload
+We collect the workload using *Intel Pin* to trace memory access for target programs.
+To observe more representative memory behavior, we use *SPEC CPU 2017* benchmarks.
+
+### Perl [500.perlbench_r](https://www.spec.org/cpu2017/Docs/benchmarks/500.perlbench_r.html)
+This benchmark uses a cut-down version of *Perl v5.22.1*.
+The trace file produced by our PIN tool has a big volume (12 GB).
+Thus we sample random chunks of the trace file to measure the performance of the caching policies.
+The number under each policy represents number of cache hits. 
+For each row, all policies operate on the same chunk. 
+```{r}
+dat.500.perlbench_r <- read.csv('../data/500.perlbench_r.csv')
+dat.500.perlbench_r
+hist(dat.500.perlbench_r$data_size, main='Chunk Size Distribution', 
+    xlab='Chunk Size (number of addresses)', col='deepskyblue')
+```
+The chunk size is sampled from a uniform distribution.
+The maximum chunk size is 10k addresses. To make meaningful simulation,
+we limit the cache size to the number of unique addresses in the chunk.
+Thus the distribution for the cache sizes are right skewed.
+
+### Computational Fluid Dynmaics [519.lbm_r](https://www.spec.org/cpu2017/Docs/benchmarks/519.lbm_r.html)
+The program implements "Lattice Boltzmann Method" (LBM) to simulate incompressible fluids in 3D.
+The trace file produced by our PIN tool has a big volume (32 GB).
+Thus we sample random chunks of the trace file to measure the performance of the caching policies.
+The number under each policy represents number of cache hits. 
+For each row, all policies operate on the same chunk. 
+
+```{r}
+dat.519.lbm_r <- read.csv('../data/519.lbm_r.csv')
+dat.519.lbm_r
+```
+
+### Video compression [525.x264_r](https://www.spec.org/cpu2017/Docs/benchmarks/525.x264_r.html)
+The program encodes video streams into *H.264/MPEG-4 AVC* format.
+The trace file produced by our PIN tool has a big volume (32 GB).
+Thus we sample random chunks of the trace file to measure the performance of the caching policies.
+The number under each policy represents number of cache hits. 
+For each row, all policies operate on the same chunk. 
+
+```{r}
+dat.525.x264_r <- read.csv('../data/525.x264_r.csv')
+dat.525.x264_r
+```
+
+### Fibonacci numbers
+This program calculates Fibonacci recursively without memoization.
+The trace file produced by our PIN tool has a size of 34 MB.
+Thus we sample random chunks of the trace file to measure the performance of the caching policies.
+The number under each policy represents number of cache hits.
+For each row, all policies operate on the same chunk.
+
+```{r}
+dat.fib <- read.csv('../data/fib.csv')
+dat.fib
+```
+
+# Workload Metrics 
+There are 11 metrics associated with each chuck of the workload.
+
+* `unique_size`: Number of unique addresses appeared in the chunk.
+* `reads`: Number of memory reads.
+* `writes`: Number of memory writes.
+* `data`: Number of data access.
+* `ins`: Number of instruction access.
+* `avg_step`: Average step size. The step size is the absolute difference between two addresses.
+* `avg_reuse_dist`: Average distance to the next occurrence of the same address.
+* `sum_sqrt_count`: Sum of the square root of the frequency for each unique address.
+* `sum_count`: Sum of the of the frequency for each unique address.
+* `lis`: The length of the longest increasing subsequence.
+* `lds`: The length of the decreasing increasing subsequence.
+
+```{r}
+add_ratio <- function(dat) {
+    dat$unqiue_ratio <- dat$unique_size / dat$data_size
+    dat$read_ratio <- dat$reads / dat$data_size
+    dat$write_ratio <- dat$writes / dat$data_size
+    dat$data_ratio <- dat$data / dat$data_size
+    dat$ins_ratio <- dat$ins / dat$data_size
+    dat$sum_sqrt_count_ratio <- dat$sum_sqrt_count / dat$data_size
+    dat$sum_count_ratio <- dat$sum_count / dat$data_size
+    dat$lis_ratio <- dat$lis / dat$data_size
+    dat$lds_ratio <- dat$lds / dat$data_size
+    dat$cache_ratio <- dat$cache_size / dat$data_size
+    dat$belady_ratio <- (dat$belady + dat$cache_size) / dat$data_size
+    dat$lru_ratio <- (dat$lru + dat$cache_size) / dat$data_size
+    dat$pivot_ratio <- (dat$pivot + dat$cache_size) / dat$data_size
+    dat$ld_ratio <- (dat$ld + dat$cache_size) / dat$data_size
+    dat$mru_ratio <- (dat$mru + dat$cache_size) / dat$data_size
+    return(dat)
+}
+
+dat.500.perlbench_r <- add_ratio(dat.500.perlbench_r)
+dat.519.lbm_r <- add_ratio(dat.519.lbm_r)
+dat.525.x264_r <- add_ratio(dat.525.x264_r)
+dat.fib <- add_ratio(dat.fib)
+D <- list(dat.500.perlbench_r, dat.519.lbm_r, dat.525.x264_r, dat.fib)
+W <- c('Perl', 'LBM', 'Video compression', 'Fibonacci')
+
+plot.hist.metric <- function(D, W, metric) {
+    par(mfrow=c(2, as.integer(length(D) / 2)))
+    for (i in 1:length(D)) {
+        hist(D[[i]][, metric], xlab=metric, main=W[i], col='deepskyblue')
+    }
+}
+```
+
+## Unique Ratio
+```{r}
+plot.hist.metric(D, W, 'unqiue_ratio')
+```
+
+## Read Ratio
+```{r}
+plot.hist.metric(D, W, 'read_ratio')
+```
+
+## Write Ratio
+```{r}
+plot.hist.metric(D, W, 'write_ratio')
+```
+
+
+## Data Ratio
+```{r}
+plot.hist.metric(D, W, 'data_ratio')
+```
+
+
+## Instruction Ratio
+```{r}
+plot.hist.metric(D, W, 'ins_ratio')
+```
+
+
+## Average Step Size
+```{r}
+plot.hist.metric(D, W, 'avg_step')
+```
+
+
+## Average Reuse Distance
+```{r}
+plot.hist.metric(D, W, 'avg_reuse_dist')
+```
+
+## Square-root Count Ratio
+```{r}
+plot.hist.metric(D, W, 'sum_sqrt_count_ratio')
+```
+
+## LIS Ratio
+```{r}
+plot.hist.metric(D, W, 'lis_ratio')
+```
+
+
+## LDS Ratio
+```{r}
+plot.hist.metric(D, W, 'lds_ratio')
+```
+
+## Hit Ratio
+
+Additionally, the performance of each caching policy is also attached to each chuck.
+The cache size is specified by `cache_size`. To create meaningful observations, 
+the `cache_size` is chosen uniform randomly between 1 and the number of unique addresses (`unique_size`).
+The performance of a caching policy is defined by its hit ratio, which is calculated by
+`(H + S) / C`, where `H` is the number of hits, `S` is the cache size, and `C` is the size of the chuck.
+
+### Perl [500.perlbench_r](https://www.spec.org/cpu2017/Docs/benchmarks/500.perlbench_r.html)
+```{r}
+plot.policy.hit_ratio <- function(dat, workload) {
+    col <- rgb(red=0, green=0, blue=0, alpha=0.2)
+    par(mfrow=c(2, 3), pty='s')
+    plot(belady_ratio ~ cache_ratio, dat, pch=19, cex=0.5, col=col, main=paste(workload, '- Belady'))
+    plot(lru_ratio ~ cache_ratio, dat, pch=19, cex=0.5, col=col, main=paste(workload, '- LRU'))
+    plot(pivot_ratio ~ cache_ratio, dat, pch=19, cex=0.5, col=col, main=paste(workload, '- Pivot'))
+    plot(ld_ratio ~ cache_ratio, dat, pch=19, cex=0.5, col=col, main=paste(workload, '- LD'))
+    plot(mru_ratio ~ cache_ratio, dat, pch=19, cex=0.5, col=col, main=paste(workload, '- MRU'))
+}
+plot.policy.hit_ratio(dat.500.perlbench_r, 'Perl')
+```
+
+The hit ratio distribution of LRU is closer to the optimal policy - Belady.
+This plot suggest LRU is more likely to be the best caching policy for this workload.
+
+### Computational Fluid Dynmaics [519.lbm_r](https://www.spec.org/cpu2017/Docs/benchmarks/519.lbm_r.html)
+```{r}
+plot.policy.hit_ratio(dat.519.lbm_r, 'LBM')
+```
+
+### Video compression [525.x264_r](https://www.spec.org/cpu2017/Docs/benchmarks/525.x264_r.html)
+```{r}
+plot.policy.hit_ratio(dat.525.x264_r, 'LBM')
+```
+
+### Fibonacci numbers
+```{r}
+plot.policy.hit_ratio(dat.fib, 'Fibonacci')
+```
+
