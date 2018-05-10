@@ -6,7 +6,7 @@ exec_sample <- function(data_size, workload) {
 }
 
 exec_policy <- function(policy, cache_size, workload) {
-    workload <- paste0(workload, '.raw.comb.workload')
+    workload <- paste0(workload, '.raw.data.workload')
     cmd <- paste(c(policy, cache_size, workload), collapse=' ')
     res <- system(cmd, intern=TRUE)
     return(as.numeric(strsplit(res, split=' ')[[1]]))
@@ -14,7 +14,7 @@ exec_policy <- function(policy, cache_size, workload) {
 
 gen <- function(r, workload, max_size, policies, all=FALSE) {
     df <- data.frame(data_size=integer(), cache_size=integer(),
-        unique_size=integer(), reads=integer(), writes=integer(), data=integer(), ins=integer(), 
+        unique_size=integer(), reads=integer(), writes=integer(), 
         avg_step=double(), avg_reuse_dist=double(),
         sum_sqrt_count=double(), sum_count=integer(), lis=integer(), lds=integer())
     for (policy in policies) {

@@ -2,14 +2,18 @@
 #include <string>
 #include <fstream>
 
-ofstream READ, WRITE;
+ofstream OUT;
 
 void log_read(ADDRINT addr) { 
-  READ << addr << '\n';
+  bool a = true;
+  OUT.write((char*)&a, 1);
+  OUT.write((char*)&addr, 8);
 }
 
 void log_write(ADDRINT addr) { 
-  WRITE << addr << '\n';
+  bool a = false;
+  OUT.write((char*)&a, 1);
+  OUT.write((char*)&addr, 8);
 }
 
 void instruction(INS ins, void *v) {
@@ -32,10 +36,8 @@ KNOB<string> prefix(KNOB_MODE_WRITEONCE, "pintool",
 int main(int argc, char * argv[]) {
   PIN_InitSymbols();
   if (PIN_Init(argc, argv)) return -1;
-  string readfile = prefix.Value() + ".read.data.workload";
-  string writefile = prefix.Value() + ".write.data.workload";
-  READ.open(readfile.c_str());
-  WRITE.open(writefile.c_str());
+  string outfile = prefix.Value() + ".raw.data.workload";
+  OUT.open(writefile.c_str());
   INS_AddInstrumentFunction(instruction, 0);
   PIN_StartProgram();
   READ.close();

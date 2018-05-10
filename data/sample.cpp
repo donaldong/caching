@@ -28,20 +28,17 @@ int main(int argc, char **argv) {
     if (start < 0) start = 0;
     input.seekg(start, input.beg);
 	string prefix = rstrip(filename, '.');
-	string outfile = prefix + ".comb.workload";
+	string f1 = prefix + ".data.workload";
 	ofstream OUT;
-    OUT.open(outfile.c_str(), ios::out | ios::binary);
+    OUT.open(f1.c_str(), ios::out | ios::binary);
     vector<ull> N(size);
 	bool read;
     bool data;
-    int reads = 0, writes = 0, count_data = 0, count_ins = 0;
+    int reads = 0, writes = 0;
     for (int i = 0; i < size; ++i) {
 		input.read((char*)&read, 1);
         if (read) ++reads;
         else ++writes;
-        input.read((char*)&data, 1);
-        if (data) ++count_data;
-        else ++count_ins;
         input.read((char*)&N[i], 8);
 		OUT.write((char*)&N[i], 8);
 	}
@@ -77,8 +74,6 @@ int main(int argc, char **argv) {
 	cout << c.size() << " ";
     cout << reads << " ";
     cout << writes << " ";
-    cout << count_data << " ";
-    cout << count_ins << " ";
 	// avg step size
 	cout << abs_diff / size << " ";
 	// avg reuse distance

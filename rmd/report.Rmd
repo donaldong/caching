@@ -55,6 +55,7 @@ If we use address to calculate the distance, the ejected element would be either
 
 ## Workload
 We collect the workload using *Intel Pin* to trace memory access for target programs.
+We implemented a Pin tool which logs the data access in binary form.
 To observe more representative memory behavior, we use *SPEC CPU 2017* benchmarks.
 
 ### Perl [500.perlbench_r](https://www.spec.org/cpu2017/Docs/benchmarks/500.perlbench_r.html)
@@ -98,6 +99,17 @@ dat.525.x264_r <- read.csv('../data/525.x264_r.csv')
 dat.525.x264_r
 ```
 
+### Pattern Recognition [531.deepsjeng_r](https://www.spec.org/cpu2017/Docs/benchmarks/531.deepsjeng_r.html)
+531.deepsjeng_r is based on Deep Sjeng WC2008, the 2008 World Computer Speed-Chess Champion. Deep Sjeng is a rewrite of the older Sjeng-Free program, focused on obtaining the highest possible playing strength.
+The trace file produced by our PIN tool has a big volume (67 GB). 
+Thus we sample random chunks of the trace file to measure the performance of the caching policies. 
+The number under each policy represents number of cache hits. For each row, all policies operate on the same chunk.
+
+```{r}
+dat.531.deepsjeng_r <- read.csv('../data/531.deepsjeng_r.csv')
+dat.531.deepsjeng_r
+```
+
 ### Fibonacci numbers
 This program calculates Fibonacci recursively without memoization.
 The trace file produced by our PIN tool has a size of 34 MB.
@@ -111,13 +123,11 @@ dat.fib
 ```
 
 # Workload Metrics 
-There are 11 metrics associated with each chuck of the workload.
+There are 9 metrics associated with each chuck of the workload.
 
 * `unique_size`: Number of unique addresses appeared in the chunk.
 * `reads`: Number of memory reads.
 * `writes`: Number of memory writes.
-* `data`: Number of data access.
-* `ins`: Number of instruction access.
 * `avg_step`: Average step size. The step size is the absolute difference between two addresses.
 * `avg_reuse_dist`: Average distance to the next occurrence of the same address.
 * `sum_sqrt_count`: Sum of the square root of the frequency for each unique address.
@@ -127,11 +137,9 @@ There are 11 metrics associated with each chuck of the workload.
 
 ```{r}
 add_ratio <- function(dat) {
-    dat$unqiue_ratio <- dat$unique_size / dat$data_size
+    dat$unique_ratio <- dat$unique_size / dat$data_size
     dat$read_ratio <- dat$reads / dat$data_size
     dat$write_ratio <- dat$writes / dat$data_size
-    dat$data_ratio <- dat$data / dat$data_size
-    dat$ins_ratio <- dat$ins / dat$data_size
     dat$sum_sqrt_count_ratio <- dat$sum_sqrt_count / dat$data_size
     dat$sum_count_ratio <- dat$sum_count / dat$data_size
     dat$lis_ratio <- dat$lis / dat$data_size
@@ -148,45 +156,50 @@ add_ratio <- function(dat) {
 dat.500.perlbench_r <- add_ratio(dat.500.perlbench_r)
 dat.519.lbm_r <- add_ratio(dat.519.lbm_r)
 dat.525.x264_r <- add_ratio(dat.525.x264_r)
+dat.531.deepsjeng_r <- add_ratio(dat.531.deepsjeng_r)
 dat.fib <- add_ratio(dat.fib)
-D <- list(dat.500.perlbench_r, dat.519.lbm_r, dat.525.x264_r, dat.fib)
-W <- c('Perl', 'LBM', 'Video compression', 'Fibonacci')
+D <- list(dat.500.perlbench_r, dat.519.lbm_r, dat.525.x264_r, dat.fib, dat.531.deepsjeng_r)
+W <- c('Perl', 'LBM', 'Video compression', 'Fibonacci', 'Pattern Recognition')
 
 plot.hist.metric <- function(D, W, metric) {
-    par(mfrow=c(2, as.integer(length(D) / 2)))
+    par(mfrow=c(3, 2))
     for (i in 1:length(D)) {
-        hist(D[[i]][, metric], xlab=metric, main=W[i], col='deepskyblue')
+        d <- D[[i]][, metric]
+        q <- quantile(d, 0.95)
+        hist(d[d < q], xlab=metric, main=W[i], col='deepskyblue')
     }
 }
 ```
 
 ## Unique Ratio
 ```{r}
-plot.hist.metric(D, W, 'unqiue_ratio')
+plot.hist.metric(D, W, 'unique_ratio')
 ```
+
+Unique ratio represents the percentage of unique addresses in the sampled chuck.
+A lower unique ratio indicates most of the addresses in the chuck are the same.
+In general, most sampled chucks don't have many different addresses.
+Thus a higher unique ratio would be less common, and the frequency decreases.
+Note the unique ratio could be a multimodal distribution, as some of the plots implied.
 
 ## Read Ratio
 ```{r}
 plot.hist.metric(D, W, 'read_ratio')
 ```
 
+Read ratio represents the percentage of the observations involve memory read.
+Read operations tend to occur in big consecutive chucks.
+Thus sampled chucks are more likely consist of all reads or none reads.
+
 ## Write Ratio
 ```{r}
 plot.hist.metric(D, W, 'write_ratio')
 ```
 
-
-## Data Ratio
-```{r}
-plot.hist.metric(D, W, 'data_ratio')
-```
-
-
-## Instruction Ratio
-```{r}
-plot.hist.metric(D, W, 'ins_ratio')
-```
-
+Write ratio represents the percentage of the observations involve memory write.
+Write operations are distributed more evenly comparing to memory read operations.
+Most sampled chucks have low write ratio. 
+It's less likely to observe a sampled chuck purely consists of memory writes. 
 
 ## Average Step Size
 ```{r}
