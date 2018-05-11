@@ -37,10 +37,9 @@ int main(int argc, char * argv[]) {
   PIN_InitSymbols();
   if (PIN_Init(argc, argv)) return -1;
   string outfile = prefix.Value() + ".raw.data.workload";
-  OUT.open(writefile.c_str());
+  OUT.open(outfile.c_str());
   INS_AddInstrumentFunction(instruction, 0);
   PIN_StartProgram();
-  READ.close();
-  WRITE.close();
+  OUT.close();
   return 0;
 }

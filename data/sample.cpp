@@ -23,10 +23,10 @@ int main(int argc, char **argv) {
     uniform_real_distribution<> dist(0, 1);
     ifstream input(filename, ios::binary|ios::ate);
     input.seekg (0, input.end);
-    ll length = input.tellg();
+    ll length = input.tellg() / 9;
     ll start = (length - size) * dist(e2);
     if (start < 0) start = 0;
-    input.seekg(start, input.beg);
+    input.seekg(start * 9, input.beg);
 	string prefix = rstrip(filename, '.');
 	string f1 = prefix + ".data.workload";
 	ofstream OUT;
